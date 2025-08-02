@@ -19,6 +19,7 @@ export type Database = {
           "District Code": number | null
           "District Name": string | null
           Pincode: number | null
+          "Price": number | null
           "S.No.": number | null
           "State Code": number | null
           "State Name": string | null
@@ -32,6 +33,7 @@ export type Database = {
           "District Code"?: number | null
           "District Name"?: string | null
           Pincode?: number | null
+          "Price"?: number | null
           "S.No."?: number | null
           "State Code"?: number | null
           "State Name"?: string | null
@@ -45,6 +47,7 @@ export type Database = {
           "District Code"?: number | null
           "District Name"?: string | null
           Pincode?: number | null
+          "Price"?: number | null
           "S.No."?: number | null
           "State Code"?: number | null
           "State Name"?: string | null

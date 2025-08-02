@@ -31,6 +31,7 @@ interface RegionMappingData {
   "SubDistrict Code": number;
   "Village Code": number;
   "Pincode": number;
+  "Price": number;
   "SubDistrict Name": string;
   "State Name": string;
   "Tier": string;
@@ -44,6 +45,7 @@ export const RegionMappingTable = () => {
   const [isFiltering, setIsFiltering] = useState(false);
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [editingPrice, setEditingPrice] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
   const [pageSize] = useState(50); // Number of rows per page
@@ -345,13 +347,28 @@ export const RegionMappingTable = () => {
     setEditValue(currentTier || "");
   };
 
+  const handleEditPrice = (index: number, currentPrice: number | null) => {
+    setEditingRow(index);
+    setEditingPrice(currentPrice);
+  };
+
   const handleSave = async (row: RegionMappingData) => {
     try {
-      console.log("Updating tier for S.No.:", row["S.No."], "to:", editValue);
+      const updateData: any = {};
+      
+      if (editValue !== "") {
+        updateData.Tier = editValue;
+        console.log("Updating tier for S.No.:", row["S.No."], "to:", editValue);
+      }
+      
+      if (editingPrice !== null) {
+        updateData.Price = editingPrice;
+        console.log("Updating price for S.No.:", row["S.No."], "to:", editingPrice);
+      }
       
       const { error } = await supabase
         .from("Region Mapping")
-        .update({ Tier: editValue })
+        .update(updateData)
         .eq('"S.No."', row["S.No."]);
 
       if (error) {
@@ -366,16 +383,17 @@ export const RegionMappingTable = () => {
 
       setEditingRow(null);
       setEditValue("");
+      setEditingPrice(null);
       
       toast({
         title: "Success",
-        description: "Tier updated successfully",
+        description: "Data updated successfully",
       });
     } catch (error) {
-      console.error("Error updating tier:", error);
+      console.error("Error updating data:", error);
       toast({
         title: "Error", 
-        description: "Failed to update tier",
+        description: "Failed to update data",
         variant: "destructive",
       });
     }
@@ -384,6 +402,7 @@ export const RegionMappingTable = () => {
   const handleCancel = () => {
     setEditingRow(null);
     setEditValue("");
+    setEditingPrice(null);
   };
 
   if (loading) {
@@ -561,6 +580,7 @@ export const RegionMappingTable = () => {
               <TableHead>SubDistrict Code</TableHead>
               <TableHead>Village Code</TableHead>
               <TableHead>Pincode</TableHead>
+              <TableHead>Price</TableHead>
               <TableHead>State Name</TableHead>
               <TableHead>District Name</TableHead>
               <TableHead>SubDistrict Name</TableHead>
@@ -571,7 +591,7 @@ export const RegionMappingTable = () => {
           </TableHeader>
           <TableBody>
             {data.map((row, index) => (
-              <TableRow key={row["S.No."]}>
+              <TableRow key={row["S.No."]} className="group">
                 <TableCell title={hasActiveFilters ? "Serial number for filtered results" : "Serial number for all results"}>
                   {getSerialNumber(index)}
                 </TableCell>
@@ -580,6 +600,31 @@ export const RegionMappingTable = () => {
                 <TableCell>{row["SubDistrict Code"]}</TableCell>
                 <TableCell>{row["Village Code"]}</TableCell>
                 <TableCell>{row["Pincode"]}</TableCell>
+                <TableCell>
+                  {editingRow === index ? (
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={editingPrice !== null ? editingPrice : ""}
+                      onChange={(e) => setEditingPrice(e.target.value ? parseFloat(e.target.value) : null)}
+                      className="w-24"
+                      placeholder="0.00"
+                    />
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span>{row["Price"] ? `₹${row["Price"].toFixed(2)}` : "-"}</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleEditPrice(index, row["Price"])}
+                        className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </TableCell>
                 <TableCell>{row["State Name"]}</TableCell>
                 <TableCell>{row["District Name"]}</TableCell>
                 <TableCell>{row["SubDistrict Name"]}</TableCell>
@@ -621,14 +666,17 @@ export const RegionMappingTable = () => {
                       </Button>
                     </div>
                   ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleEdit(index, row["Tier"])}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(index, row["Tier"])}
+                        className="h-8 w-8 p-0"
+                        title="Edit Tier"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </div>
                   )}
                 </TableCell>
               </TableRow>
