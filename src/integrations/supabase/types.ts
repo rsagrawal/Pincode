@@ -59,6 +59,63 @@ export type Database = {
         }
         Relationships: []
       }
+      "CRM Data": {
+        Row: {
+          id: number | null
+          state: string | null
+          district: string | null
+          pincode: string | null
+          hp: number | null
+          amp: number | null
+          dsn: number | null
+          ssm: number | null
+          yltp: number | null
+          wltp: number | null
+          vtp: number | null
+          rural_hp: number | null
+          rural_amp: number | null
+          rhp_legacy: number | null
+          last_updated: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: number | null
+          state?: string | null
+          district?: string | null
+          pincode?: string | null
+          hp?: number | null
+          amp?: number | null
+          dsn?: number | null
+          ssm?: number | null
+          yltp?: number | null
+          wltp?: number | null
+          vtp?: number | null
+          rural_hp?: number | null
+          rural_amp?: number | null
+          rhp_legacy?: number | null
+          last_updated?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: number | null
+          state?: string | null
+          district?: string | null
+          pincode?: string | null
+          hp?: number | null
+          amp?: number | null
+          dsn?: number | null
+          ssm?: number | null
+          yltp?: number | null
+          wltp?: number | null
+          vtp?: number | null
+          rural_hp?: number | null
+          rural_amp?: number | null
+          rhp_legacy?: number | null
+          last_updated?: string | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
