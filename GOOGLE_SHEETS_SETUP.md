@@ -6,7 +6,7 @@ This guide will help you set up the Google Sheets integration for the CRM data m
 
 1. **Google Cloud Console Access**
 2. **Google Sheets API Enabled**
-3. **API Key Generated**
+3. **Service Account Created**
 
 ## Step 1: Enable Google Sheets API
 
@@ -16,41 +16,46 @@ This guide will help you set up the Google Sheets integration for the CRM data m
 4. Search for "Google Sheets API"
 5. Click on "Google Sheets API" and click "Enable"
 
-## Step 2: Create API Key
+## Step 2: Create Service Account
 
 1. Go to "APIs & Services" > "Credentials"
-2. Click "Create Credentials" > "API Key"
-3. Copy the generated API key
-4. (Optional) Restrict the API key to Google Sheets API only for security
+2. Click "Create Credentials" > "Service Account"
+3. Fill in the service account details:
+   - **Name**: `google-all-access`
+   - **Description**: Service account for Google Sheets integration
+4. Click "Create and Continue"
+5. Skip role assignment (we'll handle permissions separately)
+6. Click "Done"
 
-## Step 3: Set Environment Variables
+## Step 3: Generate Service Account Key
 
-Create a `.env` file in your project root with the following variables:
+1. Click on the created service account
+2. Go to the "Keys" tab
+3. Click "Add Key" > "Create new key"
+4. Choose "JSON" format
+5. Download the JSON file
+6. **Important**: Keep this file secure and never commit it to version control
 
-```env
-# Supabase Configuration (already configured)
-VITE_SUPABASE_URL=your_supabase_url_here
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
-
-# Google Sheets API Configuration
-VITE_GOOGLE_SHEETS_API_KEY=your_google_sheets_api_key_here
-```
-
-## Step 4: Share Google Sheet
+## Step 4: Share Google Sheet with Service Account
 
 1. Open your Google Sheet: https://docs.google.com/spreadsheets/d/1qsCkQGiwVdeY9Tn6Pp-ZZeudr-G6r2UoJYDqjyH2tyA/edit?usp=sharing
 2. Click "Share" in the top right
-3. Set permissions to "Anyone with the link can view"
-4. Copy the Sheet ID from the URL: `1qsCkQGiwVdeY9Tn6Pp-ZZeudr-G6r2UoJYDqjyH2tyA`
+3. Add the service account email: `google-all-access@hip-principle-465308-n6.iam.gserviceaccount.com`
+4. Give it "Editor" permissions
+5. Click "Send"
 
-## Step 5: Run Database Migrations
+## Step 5: Update Service Account Configuration
+
+The service account configuration is already included in the code. If you need to use a different service account, update the `SERVICE_ACCOUNT_CONFIG` in `src/integrations/google-sheets/client.ts`.
+
+## Step 6: Run Database Migrations
 
 ```bash
 # Apply the new migrations
 npx supabase db push
 ```
 
-## Step 6: Test the Integration
+## Step 7: Test the Integration
 
 1. Start your development server: `npm run dev`
 2. Navigate to `/crm` to access the CRM Data Management page
@@ -92,33 +97,42 @@ npx supabase db push
 
 ## Security Considerations
 
-1. **API Key Security**: Never commit API keys to version control
+1. **Service Account Security**: Service account credentials are embedded in the code (for demo purposes)
 2. **Row Level Security**: Enabled on database tables
 3. **Input Validation**: All user inputs are validated
 4. **Error Logging**: Comprehensive error logging for debugging
+5. **Token Management**: Automatic token refresh and caching
 
 ## Troubleshooting
 
 ### Common Issues:
 
-1. **API Key Invalid**: Check your Google Sheets API key
+1. **Service Account Permissions**: Ensure the service account has editor access to the Google Sheet
 2. **Sheet Not Found**: Verify the sheet ID and sharing permissions
-3. **CORS Errors**: Ensure your domain is allowed in Google Cloud Console
+3. **JWT Token Errors**: Check service account configuration and private key
 4. **Database Errors**: Check Supabase connection and table permissions
 
 ### Debug Steps:
 
 1. Check browser console for errors
-2. Verify environment variables are loaded
-3. Test API key with curl:
+2. Verify service account email has access to the Google Sheet
+3. Test service account access with curl:
    ```bash
-   curl "https://sheets.googleapis.com/v4/spreadsheets/1qsCkQGiwVdeY9Tn6Pp-ZZeudr-G6r2UoJYDqjyH2tyA/values/A:N?key=YOUR_API_KEY"
+   # First get an access token
+   curl -X POST "https://oauth2.googleapis.com/token" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=YOUR_JWT_TOKEN"
+   
+   # Then test the API
+   curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+     "https://sheets.googleapis.com/v4/spreadsheets/1qsCkQGiwVdeY9Tn6Pp-ZZeudr-G6r2UoJYDqjyH2tyA/values/A:N"
    ```
 
 ## Support
 
 For issues or questions:
 1. Check the browser console for error messages
-2. Verify all environment variables are set correctly
-3. Ensure Google Sheets API is enabled
-4. Check Supabase dashboard for database errors 
+2. Verify service account has proper permissions on the Google Sheet
+3. Ensure Google Sheets API is enabled in your Google Cloud project
+4. Check Supabase dashboard for database errors
+5. Verify the service account configuration in the code matches your setup 
